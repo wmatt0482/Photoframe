@@ -134,6 +134,9 @@ static void sleepFor(uint32_t seconds) {
   seconds = constrain(seconds, kMinSleepSec, kMaxSleepSec);
   Serial.printf("Sleeping %lu s\n", (unsigned long)seconds);
   Serial.flush();
+  // The USB serial port drops the moment deep sleep starts, and flush() alone
+  // does not wait for the host to collect the last lines.
+  delay(100);
 
   led(PIN_LED_RED, false);
   led(PIN_LED_GREEN, false);

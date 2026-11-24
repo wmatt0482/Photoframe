@@ -119,13 +119,22 @@ Taken from [Waveshare's source](https://github.com/waveshareteam/ESP32-S3-PhotoP
 | BOOT / KEY buttons (active low) | 0 / 4 |
 | Red / green LED (active low) | 45 / 42 |
 
+## Verified on hardware
+
+Checked on a real ESP32-S3-PhotoPainter on 2026-11-24, powered over USB:
+
+- **Display init and refresh.** Waveshare's register sequence works at 10 MHz SPI. A full refresh takes about 30 s.
+- **Panel deep-sleep command** (`0x07 0xA5`). A second refresh after `epdSleep()` works; the reset in `epdShow()` wakes the panel.
+- **Orientation.** The default came out the right way up with the frame as tested. The flip setting covers the other case.
+- **WiFi, download and power chip.** The frame joins 2.4 GHz WiFi, fetches all 192,000 bytes over HTTPS, and finds the AXP2101.
+- **Button wake.** A button press wakes the frame from deep sleep and fetches the next picture. A press with only one photo in the library gets a 304 and no refresh.
+
+The serial port is the chip's built-in USB port, so it disappears while the frame sleeps. To flash a sleeping frame, put it in BOOT mode first (hold BOOT, tap power/reset, release BOOT). Some serial monitors reset the chip when they open the port, which makes a button wake look like a power-on.
+
 ## Not yet verified
 
-The server and web page are tested. The firmware compiles but has not run on a real frame, so expect to check these on first power-up:
-
-- **Display init and refresh.** The register sequence is copied from Waveshare's driver for this board, at 10 MHz SPI instead of their 40 MHz.
-- **Panel deep-sleep command** (`0x07 0xA5` in `epd.cpp`). Standard for Waveshare's 7.3" E6 panels but not in this board's stock driver. If the second refresh misbehaves, remove the `epdSleep()` call first.
-- **Orientation.** Defaults mirror the stock firmware's rotation. The flip setting covers the other case.
+- **Timer wake.** The frame was only woken by button and reset, never left for the full 30 minutes.
+- **Running on battery.** All testing was on USB power.
 - **Ink colours used for dithering** (`INKS` in `server/public/epd.js`). Approximate values for Spectra 6; tune them against the real panel if colours look off.
 - **Battery life.** The firmware uses plain deep sleep and leaves the power chip's rails on, as the stock firmware does in its photo mode. Sleep current has not been measured.
 
