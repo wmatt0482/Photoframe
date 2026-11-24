@@ -21,6 +21,11 @@ export const INKS = [
   { name: 'green',  code: 6, rgb: [18, 95, 32],    ideal: [0, 255, 0] },
 ];
 
+// Pixels whose channels differ by less than this count as (partly) grey, and
+// NEUTRAL_BIAS is how strongly fully grey pixels avoid the coloured inks.
+const NEUTRAL_CHROMA = 48;
+const NEUTRAL_BIAS = 8;
+
 const VALID_CODES = new Set(INKS.map((ink) => ink.code));
 const CODE_TO_INDEX = new Int8Array(16).fill(-1);
 INKS.forEach((ink, i) => { CODE_TO_INDEX[ink.code] = i; });
@@ -58,6 +63,7 @@ export function adjust(rgba, { contrast = 1, saturation = 1 } = {}) {
  */
 export function dither(rgba, width, height, palette = INKS.map((ink) => ink.rgb)) {
   const out = new Uint8Array(width * height);
+  const isGrey = palette.map(([r, g, b]) => Math.max(r, g, b) - Math.min(r, g, b) < 24);
   // Error rows for the current and next line, padded one pixel each side.
   let cur = new Float32Array((width + 2) * 3);
   let next = new Float32Array((width + 2) * 3);
@@ -70,7 +76,12 @@ export function dither(rgba, width, height, palette = INKS.map((ink) => ink.rgb)
       const g = clamp(rgba[p + 1] + cur[e + 1]);
       const b = clamp(rgba[p + 2] + cur[e + 2]);
 
-      const idx = nearest(r, g, b, palette);
+      // How grey the original pixel is: 1 for neutral, 0 once clearly coloured.
+      const o0 = rgba[p], o1 = rgba[p + 1], o2 = rgba[p + 2];
+      const chroma = Math.max(o0, o1, o2) - Math.min(o0, o1, o2);
+      const neutral = chroma >= NEUTRAL_CHROMA ? 0 : 1 - chroma / NEUTRAL_CHROMA;
+
+      const idx = nearest(r, g, b, palette, neutral, isGrey);
       out[y * width + x] = idx;
 
       const er = r - palette[idx][0];
@@ -175,16 +186,22 @@ export function encode(rgba, { orientation = 'landscape', flip = false, contrast
   return { indices, frame: pack(indices, orientation, flip) };
 }
 
-function nearest(r, g, b, palette) {
+// Mid grey is numerically closer to blue ink than to black or white, so a
+// plain nearest-colour search paints grey skies and walls as blue and yellow
+// speckle. Coloured inks are made to look further away the greyer the original
+// pixel is, which leaves neutral areas to black and white.
+function nearest(r, g, b, palette, neutral, isGrey) {
   let best = 0;
   let bestDist = Infinity;
+  const penalty = 1 + neutral * NEUTRAL_BIAS;
   for (let i = 0; i < palette.length; i++) {
     const dr = r - palette[i][0];
     const dg = g - palette[i][1];
     const db = b - palette[i][2];
     // "Redmean" weighting: a cheap approximation of perceived colour distance.
     const rm = (r + palette[i][0]) / 2;
-    const d = (2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db;
+    let d = (2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db;
+    if (!isGrey[i]) d *= penalty;
     if (d < bestDist) { bestDist = d; best = i; }
   }
   return best;

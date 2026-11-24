@@ -100,3 +100,25 @@ test('encode does not modify its input', () => {
   assert.deepEqual(rgba, copy);
   assert.ok(isValidFrame(frame));
 });
+
+const inkShare = (out, names) => out.filter((v) => names.includes(INKS[v].name)).length / out.length;
+
+// The black ink is slightly blue, so a rare coloured dot corrects for it.
+test('neutral greys are at least 97% black and white ink', () => {
+  for (const level of [60, 128, 190]) {
+    const out = dither(solid(64, 64, [level, level, level]), 64, 64);
+    assert.ok(inkShare(out, ['black', 'white']) >= 0.97, `grey ${level}`);
+  }
+});
+
+test('a faintly tinted grey stays almost entirely black and white', () => {
+  const out = dither(solid(64, 64, [150, 156, 166]), 64, 64);
+  assert.ok(inkShare(out, ['black', 'white']) > 0.85);
+});
+
+test('clearly coloured areas still use coloured ink', () => {
+  const sky = dither(solid(64, 64, [70, 130, 220]), 64, 64);
+  assert.ok(inkShare(sky, ['blue']) > 0.4);
+  const skin = dither(solid(64, 64, [224, 168, 130]), 64, 64);
+  assert.ok(inkShare(skin, ['yellow', 'red']) > 0.2);
+});
