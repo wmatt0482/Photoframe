@@ -96,6 +96,50 @@ node tools/fake-frame.mjs http://127.0.0.1:8787 dev-frame-token --out frame.png
 
 `fake-frame.mjs` makes the same request the firmware makes and saves what the panel would show as a PNG.
 
+## iPhone app
+
+`ios/` holds a native SwiftUI app that does what the web page does, through the same API and the same upload password: sign in, library grid, add a photo, crop, contrast and colour, a preview in the six inks, send, "Show next", delete, settings and frame status. It needs Xcode 16 or newer and iOS 17 or newer, and has no third-party packages.
+
+Open `ios/Photoframe.xcodeproj`, pick an iPhone simulator, and press Run. From the command line:
+
+```bash
+cd ios
+xcodebuild -project Photoframe.xcodeproj -scheme Photoframe \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build/DerivedData build
+```
+
+To run it on your own iPhone, see "Signing for a real iPhone" below (signing is automatic with no team set, which is enough for the simulator).
+
+### Send from the Photos app (share sheet)
+
+The app includes a share extension, `PhotoframeShare`. Sign in to the app once first. Then, in Photos (or any app that shares a single picture), tap Share and choose **Photoframe**. It shows the picture cropped to the frame's current orientation in the six inks; drag to move and pinch to zoom, then tap **Send to frame**. It uses the app's defaults (contrast 1.15, colour 1.3) and the frame's flip setting, shows progress, and closes itself after "Sent". If sending fails it says why and offers Try Again or Cancel. If you have not signed in to the app, it says "Open Photoframe and sign in first" and does nothing else.
+
+It is offered only for exactly one image (not several, not video, not web pages). The picture is read with ImageIO as a thumbnail no larger than 2400 pixels on the long side, so large HEIC photos stay well inside the share-extension memory limit.
+
+How the extension gets the sign-in: the app and the extension both belong to the app group `group.com.matthuber.photoframe` (`ios/Config/*.entitlements`), and the Keychain items for the server address and password are stored with that app group as their access group. A sign-in saved by an earlier build of the app is moved into the shared group the next time the app opens, so nobody has to sign in again, but the app must be opened once after updating before the share sheet can see the sign-in.
+
+Code layout: `ios/PhotoframeShare/` is the extension (loader, model, view). `ios/PhotoframeKit/` (API, Keychain, image pipeline) and `ios/PhotoframeUI/` (the crop view and its model, shared with the app's editor) are compiled into both the app and the extension; there is one copy of each file. `epd.js` is bundled into both from `server/public/epd.js`.
+
+### Signing for a real iPhone
+
+The simulator needs nothing. A real iPhone needs an Apple developer team, because app groups are a signed entitlement:
+
+1. In Xcode, select the project, and for **both** the `Photoframe` and `PhotoframeShare` targets choose your team under Signing & Capabilities (or set `DEVELOPMENT_TEAM` for both in the project's build settings). Leave signing automatic.
+2. Check that both targets show the **App Groups** capability with `group.com.matthuber.photoframe` ticked. With automatic signing Xcode registers the group and the two bundle ids (`com.matthuber.photoframe`, `com.matthuber.photoframe.share`) for you. App group ids are unique across all Apple developers; if Xcode says the group is taken, pick another id and change it in both `.entitlements` files and in `KeychainStore.sharedAccessGroup` (`ios/PhotoframeKit/KeychainStore.swift`).
+3. App Groups need a paid Apple Developer Program team; a free personal team cannot sign this entitlement.
+
+No team-prefixed `keychain-access-groups` entitlement is needed: iOS accepts an app group as a Keychain access group.
+
+How it relates to the web page:
+
+- **Same image code.** The app bundles `server/public/epd.js` at build time (the Xcode project references the file; there is no copy) and runs it in JavaScriptCore, so dithering and packing are the web page's own code. A unit test checks the output is byte-identical to Node running the same file. After changing `epd.js`, run `node ios/tools/make-epd-fixture.mjs` to refresh the expected hashes, then run the tests.
+- **Same API and password.** The server address and password are kept in the Keychain. The address defaults to the production Worker and can be changed on the sign-in screen.
+- **Cropping differs slightly.** The crop is drawn with CoreGraphics instead of a browser canvas, so resampling can differ by a level or so per pixel. Everything after the crop matches.
+
+Layout: `ios/Photoframe/` is the SwiftUI app. `ios/PhotoframeKit/` holds the API client, Keychain store and image pipeline with no SwiftUI dependency. `ios/PhotoframeUI/` holds the crop view shared by the app and the share extension, and `ios/PhotoframeShare/` is the share extension.
+
+Tests (`Product > Test`, or `xcodebuild ... test`): unit tests run anywhere. The UI tests sign in, upload, use "Show next", change settings and delete, so they must point at a local dev server (see "Test without the hardware") with at least one photo in the simulator's library (`xcrun simctl addmedia booted photo.jpg`). They refuse to run against `workers.dev`. Plain `http://` is allowed only for local addresses. `ShareExtensionUITests` drives the real share sheet: it opens Photos, shares a photo to Photoframe, sends it and checks it appears in the app's library, and checks the "sign in first" message when signed out.
+
 ## Frame API
 
 `GET /api/frame/next?have=<photo id>&advance=0|1&mv=&pct=&usb=&rssi=&fw=` with `Authorization: Bearer <FRAME_TOKEN>`.

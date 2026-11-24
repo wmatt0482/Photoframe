@@ -1,0 +1,50 @@
+[
+  {
+    "orientation": "landscape",
+    "flip": false,
+    "contrast": 1.15,
+    "saturation": 1.3,
+    "width": 800,
+    "height": 480,
+    "inputSHA256": "3df1804faf5ff5fd1b180838500deca534b539206a1d2b3ec7ec1da5924fef80",
+    "indicesSHA256": "70f90d47647a806087caebe94640c5daf170f095ade98c62791243c3ef8e0df4",
+    "previewSHA256": "068bcb5e427037734418bff37e93ed9e935d294b2397eb7647e73b4d1c77db66",
+    "frameSHA256": "c14843b19cdee9cc12a2bf28e9e51833f80d4560ce8bf751812da22a4afe6b6c"
+  },
+  {
+    "orientation": "portrait",
+    "flip": true,
+    "contrast": 1,
+    "saturation": 1,
+    "width": 480,
+    "height": 800,
+    "inputSHA256": "06980d28f5591f1d4c26ae83a4a3af9822213b483c502812825f0aa7c839514a",
+    "indicesSHA256": "73070ad79d55cf92666c47c78f6fd3a317bae6fb043f71fcacd4a60e1dcbb47c",
+    "previewSHA256": "a549333b3ed1dd8c159ccde4ac69184c5352ced6beb25246caba3bd35d77eff3",
+    "frameSHA256": "887a271fecd9c1a8ad255f0e79d36cb503314cc358e2d81fe21ea80bde95d033"
+  },
+  {
+    "orientation": "landscape",
+    "flip": true,
+    "contrast": 1.6,
+    "saturation": 0.6,
+    "width": 800,
+    "height": 480,
+    "inputSHA256": "3df1804faf5ff5fd1b180838500deca534b539206a1d2b3ec7ec1da5924fef80",
+    "indicesSHA256": "9a14093ccdf1671238a2bbdd995b230e97ef0ae940b78bd1f18bdbec0d1f4e48",
+    "previewSHA256": "2ff30c19ee65fd26b5f337fec967774865962a36fa163ec222755316d92fb30d",
+    "frameSHA256": "34f20985605211dcebd90c44a517f96befa3707fdf1719d176dc3c952a72d221"
+  },
+  {
+    "orientation": "portrait",
+    "flip": false,
+    "contrast": 0.8,
+    "saturation": 2,
+    "width": 480,
+    "height": 800,
+    "inputSHA256": "06980d28f5591f1d4c26ae83a4a3af9822213b483c502812825f0aa7c839514a",
+    "indicesSHA256": "8e58624c163f40d3b61283726b5cd5fb6c50f143b42793b3a220112a506f1e2d",
+    "previewSHA256": "dd84dba572a8cf613998a92825ce790d92b28c801a50435232bc7264337663fb",
+    "frameSHA256": "10eb80eb3abaad5c6b5e1a8146973d13b79f64443bb32b3e94dfd708aa696f5f"
+  }
+]
