@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Photoframe">
+  <title>Photoframe</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Sign in -->
+  <section id="login" class="screen" hidden>
+    <form id="login-form" class="card narrow">
+      <h1>Photoframe</h1>
+      <p class="muted">Enter the password to add pictures.</p>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <p id="login-error" class="error" role="alert" hidden></p>
+      <button class="primary" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <!-- Library -->
+  <section id="home" class="screen" hidden>
+    <header class="topbar">
+      <h1>Photoframe</h1>
+      <button id="open-settings" class="ghost" type="button">Settings</button>
+    </header>
+
+    <p id="frame-status" class="status muted"></p>
+
+    <label class="primary add" for="file">Add a photo</label>
+    <input id="file" type="file" accept="image/*" hidden>
+
+    <p id="empty" class="muted center" hidden>No photos yet. Add one and it will appear on the frame the next time it checks in.</p>
+    <ul id="grid" class="grid"></ul>
+  </section>
+
+  <!-- Crop and send -->
+  <section id="editor" class="screen" hidden>
+    <header class="topbar">
+      <button id="editor-cancel" class="ghost" type="button">Cancel</button>
+      <h1>Position photo</h1>
+      <span></span>
+    </header>
+    <div class="stage">
+      <canvas id="canvas" aria-label="Photo crop. Drag to move."></canvas>
+    </div>
+    <p class="muted center small">Drag to move. This is how it will look in the frame's six inks.</p>
+    <div class="controls">
+      <label>Zoom <input id="zoom" type="range" min="0" max="1" step="0.001" value="0"></label>
+      <label>Contrast <input id="contrast" type="range" min="0.8" max="1.6" step="0.05" value="1.15"></label>
+      <label>Colour <input id="saturation" type="range" min="0.6" max="2" step="0.05" value="1.3"></label>
+      <label class="check"><input id="show-original" type="checkbox"> Show original colours</label>
+    </div>
+    <p id="editor-error" class="error center" role="alert" hidden></p>
+    <button id="send" class="primary" type="button">Send to frame</button>
+  </section>
+
+  <!-- Photo actions -->
+  <dialog id="photo-dialog">
+    <img id="photo-dialog-img" alt="">
+    <p id="photo-dialog-meta" class="muted small"></p>
+    <button id="photo-next" class="primary" type="button">Show next</button>
+    <button id="photo-delete" class="danger" type="button">Delete</button>
+    <button id="photo-close" class="ghost" type="button">Close</button>
+  </dialog>
+
+  <!-- Settings -->
+  <dialog id="settings-dialog">
+    <form id="settings-form" method="dialog">
+      <h2>Settings</h2>
+      <label for="s-orientation">Frame orientation</label>
+      <select id="s-orientation">
+        <option value="landscape">Landscape</option>
+        <option value="portrait">Portrait</option>
+      </select>
+      <label class="check"><input id="s-flip" type="checkbox"> Pictures appear upside down, flip them</label>
+      <p class="muted small">Orientation changes apply to photos you add from now on.</p>
+
+      <label for="s-check">Check for new photos</label>
+      <select id="s-check">
+        <option value="15">Every 15 minutes</option>
+        <option value="30">Every 30 minutes</option>
+        <option value="60">Every hour</option>
+        <option value="180">Every 3 hours</option>
+        <option value="720">Every 12 hours</option>
+      </select>
+      <p class="muted small">Checking more often uses more battery.</p>
+
+      <label for="s-rotate">Change picture when nothing is new</label>
+      <select id="s-rotate">
+        <option value="0">Never</option>
+        <option value="60">Every hour</option>
+        <option value="360">Every 6 hours</option>
+        <option value="1440">Every day</option>
+        <option value="10080">Every week</option>
+      </select>
+
+      <label for="s-order">Order</label>
+      <select id="s-order">
+        <option value="sequential">In turn</option>
+        <option value="shuffle">Shuffle</option>
+      </select>
+
+      <p id="settings-error" class="error" role="alert" hidden></p>
+      <button id="settings-save" class="primary" type="submit">Save</button>
+      <button id="settings-close" class="ghost" type="button">Cancel</button>
+      <button id="sign-out" class="ghost" type="button">Sign out</button>
+    </form>
+  </dialog>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

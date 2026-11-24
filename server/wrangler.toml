@@ -1,0 +1,17 @@
+name = "photoframe"
+main = "src/worker.js"
+compatibility_date = "2026-06-01"
+
+[assets]
+directory = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "photoframe"
+# Replace with the id printed by `npx wrangler d1 create photoframe`.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never committed):
+#   UPLOAD_PASSWORD  what you type into the web app
+#   FRAME_TOKEN      what the frame's firmware sends
