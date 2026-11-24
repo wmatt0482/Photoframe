@@ -108,7 +108,7 @@ xcodebuild -project Photoframe.xcodeproj -scheme Photoframe \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build/DerivedData build
 ```
 
-To run it on your own iPhone, see "Signing for a real iPhone" below (signing is automatic with no team set, which is enough for the simulator).
+To run it on your own iPhone, see "Signing for a real iPhone" below (signing is automatic with the owner's team set in the project).
 
 ### Send from the Photos app (share sheet)
 
@@ -122,7 +122,7 @@ Code layout: `ios/PhotoframeShare/` is the extension (loader, model, view). `ios
 
 ### Signing for a real iPhone
 
-The simulator needs nothing. A real iPhone needs an Apple developer team, because app groups are a signed entitlement:
+The simulator needs nothing. A real iPhone needs an Apple developer team, because app groups are a signed entitlement. The project has `DEVELOPMENT_TEAM = KA89MUNABZ` set on every target; to build it under a different account, change that value and the bundle ids, then:
 
 1. In Xcode, select the project, and for **both** the `Photoframe` and `PhotoframeShare` targets choose your team under Signing & Capabilities (or set `DEVELOPMENT_TEAM` for both in the project's build settings). Leave signing automatic.
 2. Check that both targets show the **App Groups** capability with `group.com.matthuber.photoframe` ticked. With automatic signing Xcode registers the group and the two bundle ids (`com.matthuber.photoframe`, `com.matthuber.photoframe.share`) for you. App group ids are unique across all Apple developers; if Xcode says the group is taken, pick another id and change it in both `.entitlements` files and in `KeychainStore.sharedAccessGroup` (`ios/PhotoframeKit/KeychainStore.swift`).
