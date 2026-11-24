@@ -1,15 +1,19 @@
 name = "photoframe"
 main = "src/worker.js"
 compatibility_date = "2026-06-01"
+workers_dev = true
+preview_urls = false
 
-[assets]
-directory = "./public"
+# Bundles ./public into the Worker so it can serve the web page itself.
+[build]
+command = "node tools/embed-assets.mjs"
+watch_dir = "public"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "photoframe"
-# Replace with the id printed by `npx wrangler d1 create photoframe`.
-database_id = "00000000-0000-0000-0000-000000000000"
+# Created with `npx wrangler d1 create photoframe`.
+database_id = "4d7c03e5-b9c6-404c-83f8-da1279cec86c"
 migrations_dir = "migrations"
 
 # Secrets (set with `npx wrangler secret put <NAME>`, never committed):

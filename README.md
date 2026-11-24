@@ -2,7 +2,7 @@
 
 Replacement software for the Waveshare ESP32-S3-PhotoPainter (7.3" Spectra 6 colour e-paper frame). Add a picture from your phone and it shows up on the frame.
 
-- `server/` is a small Cloudflare Worker with a phone-friendly upload page. It stores pictures and decides what the frame shows next.
+- `server/` is a small Cloudflare Worker that serves a phone-friendly upload page. It stores pictures and decides what the frame shows next.
 - `firmware/` replaces the stock firmware. The frame wakes on a timer, asks the server for a picture, paints it, and goes back to sleep.
 
 ## How it works

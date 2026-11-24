@@ -3,3 +3,4 @@ node_modules/
 .dev.vars
 .fake-frame-have
 frame.png
+src/assets.generated.js

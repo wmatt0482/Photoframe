@@ -1,8 +1,9 @@
 // Photoframe server: stores pictures already encoded for the panel and hands
-// them to the frame when it wakes up. Static files in ./public are served by
-// the Workers asset handler; this code only sees /api/* requests.
+// them to the frame when it wakes up. It also serves the web page, which the
+// build step bundles from ./public into assets.generated.js.
 
 import { FRAME_BYTES, isValidFrame } from '../public/epd.js';
+import { ASSETS } from './assets.generated.js';
 
 const MAX_PHOTOS = 500;
 const MAX_PREVIEW_BYTES = 400_000;
@@ -35,7 +36,7 @@ async function route(request, env) {
   const { pathname } = url;
   const method = request.method;
 
-  if (!pathname.startsWith('/api/')) return json({ error: 'not found' }, 404);
+  if (!pathname.startsWith('/api/')) return serveAsset(request, pathname);
 
   // Previews are fetched by <img> tags, which cannot send an Authorization
   // header. They are protected by the photo id, 128 random bits.
@@ -58,6 +59,20 @@ async function route(request, env) {
   if (photo && photo[2] && method === 'POST') return pinNext(env, photo[1]);
 
   return json({ error: 'not found' }, 404);
+}
+
+function serveAsset(request, pathname) {
+  const asset = ASSETS[pathname === '/' ? '/index.html' : pathname];
+  if (!asset || !['GET', 'HEAD'].includes(request.method)) return json({ error: 'not found' }, 404);
+  const headers = {
+    'Content-Type': asset.type,
+    'ETag': asset.etag,
+    // Always revalidate so a new deploy shows up on the next page load.
+    'Cache-Control': 'no-cache',
+    'X-Content-Type-Options': 'nosniff',
+  };
+  if (request.headers.get('If-None-Match') === asset.etag) return new Response(null, { status: 304, headers });
+  return new Response(request.method === 'HEAD' ? null : asset.body, { headers });
 }
 
 // ---------------------------------------------------------------- web app API
